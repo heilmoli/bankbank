@@ -11,7 +11,7 @@ import zipfile
 # https://github.com/vuejs/vue/archive/refs/tags/v2.7.16.zip
 reference_archive = "./vue-2.7.16.zip"
 target_dir = "testrun"
-runs=100
+runs=10
 
 extra_content="""
 .^)>=................     .   . ..    .......=^)]^
@@ -66,17 +66,6 @@ class Stopwatch:
 
         return "\n".join(lines)
 
-def run_bench():
-
-    stopwatch = Stopwatch()
-    do_run(stopwatch)
-
-    stopwatch = Stopwatch()
-    for i in range(runs):
-        do_run(stopwatch)
-
-    print(stopwatch)
-
 
 def do_run(stopwatch : Stopwatch):
     # remove target dir if exists
@@ -91,6 +80,8 @@ def do_run(stopwatch : Stopwatch):
     with stopwatch.measure("git init"):
         # git init target_dir
         subprocess.run(["git", "init", target_dir], capture_output=True)
+        subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=target_dir, capture_output=True)
+
 
     with stopwatch.measure("git add"):
         # git add in target_dir
@@ -135,7 +126,19 @@ def do_run(stopwatch : Stopwatch):
 
     with stopwatch.measure("git second commit"):
         # initial git commit in target_dir
-        subprocess.run(["git", "commit", "-m", "initial commit"], cwd=target_dir, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "cats!"], cwd=target_dir, capture_output=True)
 
 
-run_bench()
+def run_bench():
+
+    stopwatch = Stopwatch()
+    do_run(stopwatch)
+
+    stopwatch = Stopwatch()
+    for i in range(runs):
+        do_run(stopwatch)
+
+    print(stopwatch)
+
+if __name__ == "__main__":
+    run_bench()
