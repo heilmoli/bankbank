@@ -11,8 +11,8 @@ import zipfile
 # https://github.com/vuejs/vue/archive/refs/tags/v2.7.16.zip
 # reference_archive = "./vue-2.7.16.zip"
 reference_archive = "./react-19.1.1.zip"
-# target_dir = "testrun"
-target_dir = "C:\\Users\\heilmann\\testruns"
+target_dir = "testrun"
+
 runs=10
 
 extra_content="""
@@ -58,7 +58,7 @@ class Stopwatch:
         try:
             yield start
         finally:
-            self._stats[label].append(time.perf_counter() - start)  # call inside the with-block to read current elapsed
+            self._stats[label].append(time.perf_counter() - start)
 
     def __str__(self):
         lines = []
@@ -129,6 +129,9 @@ def do_run(stopwatch : Stopwatch):
     with stopwatch.measure("git second commit"):
         # initial git commit in target_dir
         subprocess.run(["git", "commit", "-m", "cats!"], cwd=target_dir, capture_output=True)
+
+    with stopwatch.measure("recursive remove"):
+        shutil.rmtree(target_dir, ignore_errors=True)
 
 
 def run_bench():
