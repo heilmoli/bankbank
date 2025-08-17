@@ -7,10 +7,11 @@ import subprocess
 from collections import defaultdict
 import zipfile
 
+# down load archives and place in same folder as this script
 # https://github.com/facebook/react/archive/refs/tags/v19.1.1.zip
 # https://github.com/vuejs/vue/archive/refs/tags/v2.7.16.zip
-# reference_archive = "./vue-2.7.16.zip"
-reference_archive = "./react-19.1.1.zip"
+reference_archive = "./vue-2.7.16.zip"
+# reference_archive = "./react-19.1.1.zip"
 target_dir = "testrun"
 
 runs=10
