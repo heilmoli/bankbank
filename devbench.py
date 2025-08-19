@@ -1,4 +1,6 @@
+import os
 import shutil
+import stat
 import statistics
 import contextlib
 import time
@@ -10,8 +12,8 @@ import zipfile
 # down load archives and place in same folder as this script
 # https://github.com/facebook/react/archive/refs/tags/v19.1.1.zip
 # https://github.com/vuejs/vue/archive/refs/tags/v2.7.16.zip
-reference_archive = "./vue-2.7.16.zip"
-# reference_archive = "./react-19.1.1.zip"
+# reference_archive = "./vue-2.7.16.zip"
+reference_archive = "./react-19.1.1.zip"
 target_dir = "testrun"
 
 runs=10
@@ -63,16 +65,25 @@ class Stopwatch:
 
     def __str__(self):
         lines = []
-        lines.append(f"label,min,max,mean,variance,median")
+        lines.append(f"label,min(seconds),max(seconds),mean(seconds),std deviation,median(seconds)")
         for k, v in self._stats.items():
-            lines.append(f"{k},{min(v)},{max(v)},{statistics.mean(v)},{statistics.variance(v)},{statistics.median(v)}")
+            lines.append(f"{k},{min(v)},{max(v)},{statistics.mean(v)},{statistics.stdev(v)},{statistics.median(v)}")
 
         return "\n".join(lines)
 
 
+def retry_delete(func, path, exc_info):
+    if isinstance(exc_info[1], PermissionError):
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    else:
+        raise exc_info[1]
+
 def do_run(stopwatch : Stopwatch):
+
     # remove target dir if exists
-    shutil.rmtree(target_dir, ignore_errors=True)
+    if pathlib.Path(target_dir).exists():
+        shutil.rmtree(target_dir, onerror=retry_delete)
 
     with stopwatch.measure("unzip"):
         # # unzip reference_archive inside target_dir
@@ -132,7 +143,7 @@ def do_run(stopwatch : Stopwatch):
         subprocess.run(["git", "commit", "-m", "cats!"], cwd=target_dir, capture_output=True)
 
     with stopwatch.measure("recursive remove"):
-        shutil.rmtree(target_dir, ignore_errors=True)
+        shutil.rmtree(target_dir, onerror=retry_delete)
 
 
 def run_bench():
